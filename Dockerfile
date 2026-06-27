@@ -7,9 +7,15 @@ WORKDIR /app
 # Clonar solo el repo principal sin submodules
 RUN git clone https://github.com/Anil-matcha/Open-Generative-AI.git .
 
-# Inicializar solo los submodules que funcionan (saltear Open-AI-Design-Agent que tiene commit roto)
-RUN git submodule update --init packages/Vibe-Workflow || true
-RUN git submodule update --init packages/Open-Poe-AI || true
+# Clonar submodules directamente desde main (saltear referencias rotas)
+RUN rm -rf packages/Vibe-Workflow && \
+    git clone https://github.com/SamurAIGPT/Vibe-Workflow.git packages/Vibe-Workflow
+
+RUN rm -rf packages/Open-Poe-AI && \
+    git clone https://github.com/Anil-matcha/Open-Poe-AI.git packages/Open-Poe-AI
+
+RUN rm -rf packages/Open-AI-Design-Agent && \
+    git clone https://github.com/Anil-matcha/Open-AI-Design-Agent.git packages/Open-AI-Design-Agent
 
 # Instalar y buildear packages
 RUN npm install
