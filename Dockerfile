@@ -11,11 +11,14 @@ RUN git clone https://github.com/Anil-matcha/Open-Generative-AI.git .
 RUN git submodule update --init packages/Vibe-Workflow || true
 RUN git submodule update --init packages/Open-Poe-AI || true
 
-# Instalar y buildear solo los packages disponibles
+# Instalar y buildear packages
 RUN npm install
 RUN npm run build:workflow || true
 RUN npm run build:agent || true
 RUN npm run build:studio
+
+# Buildear Next.js
+RUN npm run build
 
 EXPOSE 3000
 ENV NODE_ENV=production
