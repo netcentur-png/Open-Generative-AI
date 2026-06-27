@@ -1,27 +1,20 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
+
+# Instalar git (necesario para submodules)
+RUN apk add --no-cache git
+
 WORKDIR /app
 
-# Install dependencies
-FROM base AS deps
-COPY package*.json ./
-COPY packages/Vibe-Workflow/packages/workflow-builder/package*.json ./packages/Vibe-Workflow/packages/workflow-builder/
-COPY packages/Open-Poe-AI/packages/agents/package*.json ./packages/Open-Poe-AI/packages/agents/
-COPY packages/studio/package*.json ./packages/studio/
-RUN npm install
+# Clonar el repo original con submodules
+RUN git clone --recurse-submodules https://github.com/Anil-matcha/Open-Generative-AI.git .
 
-# Build sub-packages
-FROM deps AS builder
-COPY . .
-RUN npm run build:packages
-RUN npm run build
+# Instalar dependencias y buildear packages
+RUN npm run setup
 
-# Production runner
-FROM base AS runner
-ENV NODE_ENV=production
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-
+# Exponer puerto
 EXPOSE 3000
-CMD ["npm", "start"]
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+CMD ["npm", "run", "start"]
