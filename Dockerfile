@@ -1,19 +1,23 @@
 FROM node:20-alpine
 
-# Instalar git (necesario para submodules)
 RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Clonar el repo original con submodules
-RUN git clone --recurse-submodules https://github.com/Anil-matcha/Open-Generative-AI.git .
+# Clonar solo el repo principal sin submodules
+RUN git clone https://github.com/Anil-matcha/Open-Generative-AI.git .
 
-# Instalar dependencias y buildear packages
-RUN npm run setup
+# Inicializar solo los submodules que funcionan (saltear Open-AI-Design-Agent que tiene commit roto)
+RUN git submodule update --init packages/Vibe-Workflow || true
+RUN git submodule update --init packages/Open-Poe-AI || true
 
-# Exponer puerto
+# Instalar y buildear solo los packages disponibles
+RUN npm install
+RUN npm run build:workflow || true
+RUN npm run build:agent || true
+RUN npm run build:studio
+
 EXPOSE 3000
-
 ENV NODE_ENV=production
 ENV PORT=3000
 
